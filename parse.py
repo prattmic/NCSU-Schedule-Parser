@@ -11,6 +11,7 @@ from oauth2client.tools import run
 from bs4 import BeautifulSoup
 
 import datetime
+import sys
 
 firstday = datetime.datetime(2012, 8, 16)
 lastday  = datetime.datetime(2012, 11, 30)
@@ -151,6 +152,21 @@ def days2str(days):
 
     return string
 
+def select_calendar(service):
+    calendar_list = service.calendarList().list().execute()
+
+    for i, cal in enumerate(calendar_list["items"]):
+        print "%s: %s" % (i, cal["summary"])
+
+    selection = int(raw_input("Select a calendar # to add to: "))
+
+    if selection < 0 or selection >= len(calendar_list["items"]):
+        print "You have failed at selecting a calendar.  I am not sorry"
+        print "If you desired calendar did not appear, I am sorry"
+        exit(1)
+
+    return calendar_list["items"][selection]["id"]
+
 def build_event(cls):
     event = {}
 
@@ -169,14 +185,35 @@ def build_event(cls):
     return event
 
 if __name__ == "__main__":
-    #for cls in parse_html("schedule.html"):
-    #    print cls
-    #    print build_event(cls)
+    if len(sys.argv) != 2:
+        print "Usage: %s FILE" % sys.argv[0]
+        print "FILE is the HTML file from NCSU Course Timetable, accessible by"
+        print "clicking 'Schedule Grid View' from 'My Class Schedule' in MyPack Portal."
+        exit(1)
 
-    classes = parse_html("schedule.html")
+    print "First day of class set to %s" % firstday.strftime("%Y-%b-%d")
+    print "Last day of class set to %s\n" % lastday.strftime("%Y-%b-%d")
+
+    classes = parse_html(sys.argv[1])
+
+    for cls in classes:
+        print "%s Section %s: %s,\tMeets %s from %s to %s" % (cls["name"], cls["section"], cls["description"], days2str(cls["days"]), str(cls["time"][0]), str(cls["time"][1]))
+
+    if raw_input("Are these classes correct? (y/n) ") != "y":
+        print "I have failed you, and I am sorry."
+        exit(1)
 
     service = google_service()
 
-    created_event = service.events().insert(calendarId="pratt.im_g4cr216lnv1i4asi78tsso5ulg@group.calendar.google.com", body=build_event(classes[0])).execute()
+    calendar_id = select_calendar(service)
 
-    print created_event
+    i = 1
+    for cls in classes:
+        created_event = service.events().insert(calendarId=calendar_id, body=build_event(cls)).execute()
+
+        if created_event:
+            print "Successfully added class %d" % i
+        else:
+            print "Failed to add class %d" % i
+
+        i += 1

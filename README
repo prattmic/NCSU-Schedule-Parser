@@ -3,3 +3,14 @@ beautifulsoup4
 python-gflags
 python-google-api-python-client
 python-google-oauth2client
+
+The first two dependencies can be installed through a simple "pip install".  The last two can be found at http://code.google.com/p/google-api-python-client/   
+
+You will need to enter your Google API and OAuth API keys at the top of parse.py  These can be acquired from https://code.google.com/apis/console#access
+Make sure you have enabled the Google Calendar API for your key.
+
+Classes are set to fill in all time between firstday and lastday, which can be set at the top of parse.py
+
+The program takes as its argument the html file of the NCSU Course Schedule TimeTable, which is the weeklong grid layout accessible by clicking "Schedule Grid View" from "My Class Schedule" on MyPack portal.  Simply save this page and point parse.py at the HTML document.
+
+On first use, the script will open a browser window for authentication.  Remove calendar.dat to authenticate with a different user.
