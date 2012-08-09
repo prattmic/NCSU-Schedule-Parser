@@ -1,0 +1,5 @@
+Dependencies:
+beautifulsoup4
+python-gflags
+python-google-api-python-client
+python-google-oauth2client
