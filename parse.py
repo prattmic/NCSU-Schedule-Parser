@@ -68,12 +68,15 @@ def parse_html(filename):
         cls["section"]      = td[1].contents[0].strip()
         cls["description"]  = td[2].contents[0].strip()
         cls["credits"]      = td[3].contents[0].strip()
-        cls["days"]         = [day2int(day) for day in td[4].contents[0].strip().split()]
-        time = [datetime.datetime.strptime(i.strip(), "%I:%M %p") for i in td[5].contents[0].split("-")]
-        cls["time"]         = [datetime.timedelta(hours=t.hour, minutes=t.minute) for t in time]
         cls["room"]         = td[6].contents[0].strip()
 
-        classes.append(cls)
+        days = td[4].contents
+        times = td[5].contents
+        if days and times:
+            cls["days"] = [day2int(day) for day in days[0].strip().split()]
+            time = [datetime.datetime.strptime(i.strip(), "%I:%M %p") for i in times[0].split("-")]
+            cls["time"] = [datetime.timedelta(hours=t.hour, minutes=t.minute) for t in time]
+            classes.append(cls)
 
     return classes
 
